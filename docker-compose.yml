@@ -6,6 +6,9 @@ services:
       dockerfile: Dockerfile
     image: wppconnect/wppconnect-server:local
     restart: unless-stopped
+    networks:
+      - chatwoot_net
+    user: "${UID:-1000}:${GID:-1000}"
     environment:
       PORT: "21465"
       HOST: "http://localhost"
@@ -14,11 +17,11 @@ services:
       TOKEN_STORE_TYPE: "${TOKEN_STORE_TYPE:-file}"
       CUSTOM_USER_DATA_DIR: "/usr/src/wpp-server/userDataDir/"
     volumes:
-      - wppconnect_tokens:/usr/src/wpp-server/tokens
-      - wppconnect_user_data:/usr/src/wpp-server/userDataDir
-      - wppconnect_uploads:/usr/src/wpp-server/uploads
-      - wppconnect_images:/usr/src/wpp-server/WhatsAppImages
-      - wppconnect_logs:/usr/src/wpp-server/log
+      - ./wppData/wppconnect_tokens:/usr/src/wpp-server/tokens
+      - ./wppData/wppconnect_user_data:/usr/src/wpp-server/userDataDir
+      - ./wppData/wppconnect_uploads:/usr/src/wpp-server/uploads
+      - ./wppData/wppconnect_images:/usr/src/wpp-server/WhatsAppImages
+      - ./wppData/wppconnect_logs:/usr/src/wpp-server/log
     ports:
       - "21465:21465"
     healthcheck:
@@ -34,3 +37,9 @@ volumes:
   wppconnect_uploads: {}
   wppconnect_images: {}
   wppconnect_logs: {}
+
+networks:
+  chatwoot_net:
+    external: true
+  n8n_n8n-net:
+    external: true
