@@ -1,6 +1,8 @@
 services:
   wppconnect:
     container_name: wpp-server
+    env_file:
+      - ../.env.production
     build:
       context: .
       dockerfile: Dockerfile
