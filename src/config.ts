@@ -11,7 +11,7 @@ function envNumber(name: string, fallback: number): number {
 }
 
 export default {
-  secretKey: env.SECRET_KEY || 'THISISMYSECURETOKEN',
+  secretKey: env.SECRET_KEY_WPP || 'THISISMYSECURETOKEN',
   host: env.HOST || 'http://localhost',
   port: env.PORT || '21465',
   deviceName: 'WppConnect',

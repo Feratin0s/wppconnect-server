@@ -2,7 +2,7 @@ services:
   wppconnect:
     container_name: wpp-server
     env_file:
-      - ../.env.production
+      - ../.env.production 
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,9 +13,9 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     environment:
       PORT: "21465"
-      HOST: "http://localhost"
-      SECRET_KEY: "${SECRET_KEY:-THISISMYSECURETOKEN}"
-      WEBHOOK_URL: "${WEBHOOK_URL:-}"
+      HOST: "http://0.0.0.0"
+      #SECRET_KEY_WPP: "${SECRET_KEY_WPP:-THISISMYSECURETOKEN}"
+      #WEBHOOK_URL: "${WEBHOOK_URL:-}"
       TOKEN_STORE_TYPE: "${TOKEN_STORE_TYPE:-file}"
       CUSTOM_USER_DATA_DIR: "/usr/src/wpp-server/userDataDir/"
     volumes:
