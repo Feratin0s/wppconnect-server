@@ -27,3 +27,4 @@ e2e/.runtime-qrs/
 .env
 .env.*
 !.env.example
+/wppData
