@@ -15,12 +15,12 @@ function envNumber(name: string, fallback: number): number {
 }
 
 export default {
-  secretKey: env.SECRET_KEY || 'THISISMYSECURETOKEN',
+  secretKey: env.SECRET_KEY_WPP || env.SECRET_KEY || 'THISISMYSECURETOKEN',
   host: env.HOST || 'http://localhost',
   port: env.PORT || '21465',
   deviceName: 'WppConnect',
   poweredBy: 'WPPConnect-Server',
-  startAllSession: true,
+  startAllSession: false,
   tokenStoreType: env.TOKEN_STORE_TYPE || 'file',
   maxListeners: envNumber('MAX_LISTENERS', 15),
   customUserDataDir: env.CUSTOM_USER_DATA_DIR || './userDataDir/',
@@ -30,7 +30,7 @@ export default {
       .split(',')
       .map((url) => url.trim())
       .filter(Boolean),
-    autoDownload: true,
+    autoDownload: false,
     retryAttempts: envNumber('WEBHOOK_RETRY_ATTEMPTS', 3),
     retryDelay: envNumber('WEBHOOK_RETRY_DELAY', 5000),
     requestTimeout: envNumber('WEBHOOK_REQUEST_TIMEOUT', 30000),
@@ -40,11 +40,11 @@ export default {
     readMessage: true,
     allUnreadOnStart: false,
     listenAcks: true,
-    onPresenceChanged: true,
-    onParticipantsChanged: true,
-    onReactionMessage: true,
-    onCommentMessage: true,
-    onPollResponse: true,
+    onPresenceChanged: false,
+    onParticipantsChanged: false,
+    onReactionMessage: false,
+    onCommentMessage: false,
+    onPollResponse: false,
     onRevokedMessage: true,
     onLabelUpdated: true,
     onSelfMessage: false,
