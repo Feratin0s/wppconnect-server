@@ -1138,7 +1138,11 @@ routes.post('/api/:session/chatwoot', DeviceController.chatWoot);
 
 // Api Doc
 routes.use('/api-docs', swaggerUi.serve as any);
-routes.get('/api-docs', swaggerUi.setup(swaggerDocument) as any);
+const swaggerHandler = swaggerUi.setup(swaggerDocument) as any;
+routes.get('/api-docs', (req, res, next) => {
+  res.type('html');
+  return swaggerHandler(req, res, next);
+});
 
 //k8s
 routes.get('/healthz', HealthCheck.healthz);
