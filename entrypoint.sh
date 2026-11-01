@@ -17,7 +17,7 @@ if ! command -v flock >/dev/null 2>&1; then
 fi
 
 # 3. Take exclusive ownership of the profile directory. File descriptor 9 stays
-#    open for the whole life of the server (node and Chromium inherit it).
+#    open for the whole life of this shell (and of the server it starts).
 #    If another live entrypoint already owns it, stop here.
 exec 9>"$OWNER_LOCK"
 if ! flock -n 9; then
@@ -50,4 +50,63 @@ fi
 # 5. Mark the directory as managed by this entrypoint.
 touch "$MANAGED_MARKER"
 
-exec node dist/server.js "$@"
+echo "🚀 Starting WPPConnect..."
+
+# Run the server in the background (no `exec`: this script must keep running
+# to send the wakeup). It inherits fd 9, and this shell keeps it open too,
+# so the lock stays held while the server is alive.
+node dist/server.js "$@" &
+SERVER_PID=$!
+
+# Without `exec` this shell is the container's main process, so forward
+# docker stop / Ctrl+C to the server so it can shut down cleanly.
+trap 'kill -TERM "$SERVER_PID" 2>/dev/null || true' TERM INT
+
+echo "⏳ Waiting for WPPConnect API..."
+
+until node -e "
+fetch('http://localhost:21465/api-docs')
+    .then(r => process.exit(r.ok ? 0 : 1))
+    .catch(() => process.exit(1))
+"; do
+  # If the server died before the API came up, stop instead of looping forever.
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    status=0
+    wait "$SERVER_PID" || status=$?
+    echo "entrypoint: server exited before the API was ready (status $status)" >&2
+    exit "$status"
+  fi
+  sleep 1
+done
+
+if [ -n "${WPP_WAKEUP:-}" ]; then
+  echo "📡 Sending wakeup webhook..."
+  # The URL is read from the environment (not pasted into the code) and is
+  # not printed, since it may contain a secret.
+  node -e '
+fetch(process.env.WPP_WAKEUP, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+})
+.then(async r => {
+    console.log("Wakeup response:", r.status, await r.text());
+    if (!r.ok) process.exit(1);
+})
+.catch(err => {
+    console.error("Erro ao enviar wakeup:", err);
+    process.exit(1);
+});
+'
+  echo "✅ Wakeup sent!"
+else
+  echo "WPP_WAKEUP not set; skipping wakeup webhook"
+fi
+
+# Wait for the server. If a signal interrupts `wait`, keep waiting until the
+# server has really exited, then return its exit status.
+status=0
+while :; do
+  wait "$SERVER_PID" && status=0 || status=$?
+  kill -0 "$SERVER_PID" 2>/dev/null || break
+done
+exit "$status"
