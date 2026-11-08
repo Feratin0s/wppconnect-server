@@ -55,8 +55,8 @@ export default {
     uploadS3: false,
   },
   chatwoot: {
-    sendQrCode: true,
-    sendStatus: true,
+    sendQrCode: false,
+    sendStatus: false,
   },
   archive: {
     enable: false,
