@@ -2,7 +2,7 @@ services:
   wppconnect:
     container_name: wpp-server
     env_file:
-      - ../.env.production 
+      - ../.env.production
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,14 +10,15 @@ services:
     restart: unless-stopped
     networks:
       - chatwoot_net
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
     environment:
-      PORT: "21465"
-      HOST: "http://0.0.0.0"
+      PORT: '21465'
+      HOST: 'http://0.0.0.0'
       #SECRET_KEY_WPP: "${SECRET_KEY_WPP:-THISISMYSECURETOKEN}"
       #WEBHOOK_URL: "${WEBHOOK_URL:-}"
-      TOKEN_STORE_TYPE: "${TOKEN_STORE_TYPE:-file}"
-      CUSTOM_USER_DATA_DIR: "/usr/src/wpp-server/userDataDir/"
+      TOKEN_STORE_TYPE: '${TOKEN_STORE_TYPE:-file}'
+      CUSTOM_USER_DATA_DIR: '/usr/src/wpp-server/userDataDir/'
+      TZ: 'America/Recife'
     volumes:
       - ./wppData/wppconnect_tokens:/usr/src/wpp-server/tokens
       - ./wppData/wppconnect_user_data:/usr/src/wpp-server/userDataDir
@@ -25,9 +26,13 @@ services:
       - ./wppData/wppconnect_images:/usr/src/wpp-server/WhatsAppImages
       - ./wppData/wppconnect_logs:/usr/src/wpp-server/log
     ports:
-      - "21465:21465"
+      - '21465:21465'
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:$${PORT:-21465}/healthz || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          'wget -q --spider http://127.0.0.1:$${PORT:-21465}/healthz || exit 1',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
