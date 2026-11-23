@@ -47,6 +47,7 @@
     "@babel/runtime": "^7.29.10",
     "@fastify/express": "^4.0.7",
     "@wppconnect-team/wppconnect": "^2.3.6",
+    "@wppconnect/wa-js": "^4.8.2",
     "archiver": "^7.0.1",
     "axios": "^1.20.0",
     "bcrypt": "^6.0.0",
