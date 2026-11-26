@@ -20,7 +20,7 @@ import expressPlugin from '@fastify/express';
 import { defaultLogger } from '@wppconnect-team/wppconnect';
 import cors from 'cors';
 import express, { NextFunction, Router } from 'express';
-import boolParser from 'express-query-boolean';
+//import boolParser from 'express-query-boolean';
 import Fastify, { FastifyInstance } from 'fastify';
 import mergeDeep from 'merge-deep';
 import process from 'process';
@@ -100,7 +100,26 @@ export async function initServer(
   app.use(cors());
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
-  app.use(boolParser());
+  //app.use(boolParser());
+  // Converte 'true'/'false' da query string em boolean, sem depender de
+  // obj.hasOwnProperty (req.query pode vir sem protótipo no Fastify).
+  app.use((req: any, _res: any, next: any) => {
+    const raw = req.query || {};
+    const parsed: Record<string, any> = {};
+    for (const key of Object.keys(raw)) {
+      const value = raw[key];
+      parsed[key] = value === 'true' ? true : value === 'false' ? false : value;
+    }
+    // `query` só tem getter no @fastify/express: atribuir direto lança erro,
+    // então define uma propriedade própria na requisição.
+    Object.defineProperty(req, 'query', {
+      value: parsed,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+    next();
+  });
 
   if (config?.aws_s3?.access_key_id && config?.aws_s3?.secret_key) {
     process.env['AWS_ACCESS_KEY_ID'] = config.aws_s3.access_key_id;
